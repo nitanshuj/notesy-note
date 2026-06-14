@@ -11,7 +11,6 @@ export const EditorTitle = () => {
   const handleTitleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setActiveNote({ ...activeNote, title: newTitle })
-
     setIsSaving(true)
     await noteUpdate(activeNote.id, newTitle, activeNote.content_json, activeNote.content_text)
     setIsSaving(false)
@@ -24,8 +23,6 @@ export const EditorTitle = () => {
     try {
       await noteMoveToFolder(activeNote.id, folderId)
       setActiveNote({ ...activeNote, folder_id: folderId })
-      
-      // Refresh the notes list in the sidebar
       const refreshedNotes = await notesList(activeFolderId || undefined)
       setNotes(refreshedNotes)
     } catch(err) {
@@ -33,24 +30,34 @@ export const EditorTitle = () => {
     }
   }
 
+  const createdDate = new Date(activeNote.created_at).toLocaleDateString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric'
+  })
+
+  const selectStyle: React.CSSProperties = {
+    backgroundColor: 'var(--color-highlight)',
+    border: '1px solid var(--color-border)',
+    borderRadius: '8px',
+    color: 'var(--color-type-secondary)',
+    padding: '3px 8px',
+    fontSize: '11px',
+    outline: 'none',
+  }
 
   return (
-    <div className="px-8 py-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <input
-        type="text"
-        value={activeNote.title}
-        onChange={handleTitleChange}
-        placeholder="Note Title"
-        className="flex-1 text-3xl font-bold bg-transparent outline-none text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600"
-      />
-      <div className="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <span>Folder:</span>
-          <select
-            value={activeNote.folder_id || 'none'}
-            onChange={handleFolderChange}
-            className="border border-zinc-200 dark:border-zinc-800 rounded bg-white dark:bg-zinc-950 px-2 py-1 outline-none text-zinc-700 dark:text-zinc-300"
-          >
+    <div
+      className="flex flex-col gap-3 px-10 pt-8 pb-2 theme-transition"
+      style={{ backgroundColor: 'var(--color-canvas)' }}
+    >
+      {/* Unobtrusive metadata row */}
+      <div
+        className="flex flex-wrap items-center gap-3 text-[11px]"
+        style={{ color: 'var(--color-type-secondary)' }}
+      >
+        {/* Folder picker */}
+        <div className="flex items-center gap-1.5">
+          <span>📂</span>
+          <select value={activeNote.folder_id || 'none'} onChange={handleFolderChange} style={selectStyle}>
             <option value="none">No Folder</option>
             {folders.map(f => (
               <option key={f.id} value={f.id}>{f.name}</option>
@@ -58,14 +65,20 @@ export const EditorTitle = () => {
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span>Font:</span>
-          <select
-            value={editorFont}
-            onChange={(e) => setEditorFont(e.target.value as any)}
-            className="border border-zinc-200 dark:border-zinc-800 rounded bg-white dark:bg-zinc-950 px-2 py-1 outline-none text-zinc-700 dark:text-zinc-300"
-          >
-            <option value="sans">Default (Geist)</option>
+        {/* Divider dot */}
+        <span style={{ opacity: 0.3 }}>·</span>
+
+        {/* Created date */}
+        <span>Created {createdDate}</span>
+
+        {/* Divider dot */}
+        <span style={{ opacity: 0.3 }}>·</span>
+
+        {/* Font picker */}
+        <div className="flex items-center gap-1.5">
+          <span>Aa</span>
+          <select value={editorFont} onChange={(e) => setEditorFont(e.target.value as any)} style={selectStyle}>
+            <option value="sans">Geist</option>
             <option value="calibri">Calibri</option>
             <option value="comicsans">Comic Sans</option>
             <option value="helvetica">Helvetica</option>
@@ -74,7 +87,22 @@ export const EditorTitle = () => {
           </select>
         </div>
       </div>
+
+      {/* Title */}
+      <input
+        type="text"
+        value={activeNote.title}
+        onChange={handleTitleChange}
+        placeholder="Untitled"
+        className="w-full text-3xl font-bold bg-transparent outline-none placeholder-opacity-30"
+        style={{
+          color: 'var(--color-type-primary)',
+          caretColor: 'var(--color-accent)',
+        }}
+      />
+
+      {/* Thin separator line */}
+      <div style={{ height: '1px', backgroundColor: 'var(--color-border)', marginTop: '4px' }} />
     </div>
   )
 }
-

@@ -9,7 +9,7 @@ import { FileEdit } from 'lucide-react'
 
 function App() {
   const { toggleSearch, isDarkMode, activeNoteId, activeFolderId, setActiveNote } = useAppStore()
-  const { isSaving, wordCount, activeNote, setActiveNote: setEditorActiveNote } = useEditorStore()
+  const { setActiveNote: setEditorActiveNote } = useEditorStore()
 
   useEffect(() => {
     // Apply dark mode immediately on mount based on store
@@ -40,10 +40,8 @@ function App() {
         }
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
         e.preventDefault()
-        // Simple implementation of daily note logic. Search for today's date first, else create.
         const today = new Date().toISOString().split('T')[0]
         try {
-          // just create for now in MVP
           const note = await noteCreate(today, activeFolderId || undefined)
           setActiveNote(note.id)
         } catch(e) {
@@ -56,45 +54,76 @@ function App() {
   }, [toggleSearch, activeFolderId, setActiveNote])
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-teal-200 dark:selection:bg-teal-900/50">
+    <div
+      className="flex h-screen w-screen overflow-hidden font-sans theme-transition"
+      style={{
+        backgroundColor: 'var(--color-canvas)',
+        color: 'var(--color-type-primary)',
+      }}
+    >
       <Sidebar />
       <main className="flex-1 flex flex-col relative min-w-0">
         {activeNoteId ? (
           <Editor />
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 bg-white dark:bg-zinc-950">
-            <FileEdit size={48} className="mb-4 opacity-50" />
-            <h2 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">Select a note or create a new one</h2>
-            <button 
-              onClick={async () => {
-                const note = await noteCreate('Untitled', activeFolderId || undefined)
-                setActiveNote(note.id)
-              }}
-              className="mt-6 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-md font-medium transition-colors"
+          <div
+            className="flex-1 flex flex-col items-center justify-center theme-transition"
+            style={{ backgroundColor: 'var(--color-canvas)' }}
+          >
+            <div
+              className="flex flex-col items-center gap-5 p-10 rounded-2xl"
+              style={{ backgroundColor: 'var(--color-highlight)', border: '1px solid var(--color-border)' }}
             >
-              + New Note
-            </button>
-            <div className="mt-8 text-sm flex items-center gap-4 opacity-60">
-              <span><kbd className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded mr-1">Ctrl+N</kbd> New note</span>
-              <span><kbd className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded mr-1">Ctrl+K</kbd> Search</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Status bar */}
-        {activeNoteId && (
-          <div className="h-7 px-4 flex flex-row items-center justify-between text-[11px] text-zinc-500 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-            <div className="flex items-center gap-4">
-              <span>{wordCount} words</span>
-              {isSaving ? <span>Saving...</span> : <span>Saved</span>}
-            </div>
-            <div className="flex items-center gap-4">
-              {activeNote && <span>Created: {new Date(activeNote.created_at).toLocaleDateString()}</span>}
+              <FileEdit
+                size={44}
+                style={{ color: 'var(--color-accent)', opacity: 0.7 }}
+              />
+              <h2
+                className="text-xl font-semibold"
+                style={{ color: 'var(--color-type-primary)' }}
+              >
+                Select a note or create a new one
+              </h2>
+              <button
+                onClick={async () => {
+                  const note = await noteCreate('Untitled', activeFolderId || undefined)
+                  setActiveNote(note.id)
+                }}
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+                style={{ backgroundColor: 'var(--color-accent)' }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--color-accent)')}
+              >
+                + New Note
+              </button>
+              <div
+                className="text-xs flex items-center gap-5 mt-1"
+                style={{ color: 'var(--color-type-secondary)' }}
+              >
+                <span>
+                  <kbd
+                    className="px-1.5 py-0.5 rounded text-[11px] mr-1"
+                    style={{ backgroundColor: 'var(--color-border)', color: 'var(--color-type-secondary)' }}
+                  >
+                    Ctrl+N
+                  </kbd>
+                  New note
+                </span>
+                <span>
+                  <kbd
+                    className="px-1.5 py-0.5 rounded text-[11px] mr-1"
+                    style={{ backgroundColor: 'var(--color-border)', color: 'var(--color-type-secondary)' }}
+                  >
+                    Ctrl+K
+                  </kbd>
+                  Search
+                </span>
+              </div>
             </div>
           </div>
         )}
       </main>
-      
+
       <SearchModal />
     </div>
   )

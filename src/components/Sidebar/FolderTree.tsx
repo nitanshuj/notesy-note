@@ -16,13 +16,9 @@ const FolderItem = ({ folder, folders, depth = 0 }: { folder: Folder, folders: F
     if (!confirmDelete) return
     try {
       await folderDelete(folder.id)
-      if (activeFolderId === folder.id) {
-        setActiveFolder(null)
-      }
+      if (activeFolderId === folder.id) setActiveFolder(null)
       const updatedFolders = await foldersList()
       useAppStore.getState().setFolders(updatedFolders)
-
-      // Refresh notes list (notes in this folder are now orphaned and should show up in "All Notes" list)
       const updatedNotes = await notesList(activeFolderId === folder.id ? undefined : activeFolderId || undefined)
       useAppStore.getState().setNotes(updatedNotes)
     } catch(err) {
@@ -45,35 +41,52 @@ const FolderItem = ({ folder, folders, depth = 0 }: { folder: Folder, folders: F
 
   return (
     <div>
-      <div 
-        className={`group flex items-center justify-between py-1 px-2 rounded-md cursor-pointer text-sm transition-colors ${isActive ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50'}`}
-        style={{ paddingLeft: `${(depth * 12) + 8}px` }}
+      <div
+        className="group flex items-center justify-between py-1.5 px-2 rounded-lg cursor-pointer text-sm transition-all duration-150 theme-transition"
+        style={{
+          paddingLeft: `${(depth * 12) + 8}px`,
+          backgroundColor: isActive ? 'var(--color-highlight)' : 'transparent',
+          color: isActive ? 'var(--color-accent)' : 'var(--color-type-secondary)',
+          boxShadow: isActive ? '0 1px 3px rgba(169,112,94,0.08)' : 'none',
+        }}
+        onMouseEnter={e => {
+          if (!isActive) e.currentTarget.style.backgroundColor = 'var(--color-highlight-mid)'
+        }}
+        onMouseLeave={e => {
+          if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'
+        }}
         onClick={() => setActiveFolder(folder.id)}
       >
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <button 
+          <button
             className={`p-0.5 rounded-sm opacity-50 hover:opacity-100 ${children.length === 0 ? 'invisible' : ''}`}
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
           >
-            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
           </button>
-          <FolderIcon size={14} className="opacity-70 flex-shrink-0" />
-          <span className="truncate">{folder.name}</span>
+          <FolderIcon size={13} className="opacity-70 flex-shrink-0" />
+          <span className="truncate text-[13px]">{folder.name}</span>
         </div>
-        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 flex-shrink-0">
+        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 flex-shrink-0 transition-opacity">
           <button
             onClick={handleRename}
-            className="p-0.5 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded transition-colors"
+            className="p-0.5 rounded transition-colors"
             title="Rename Folder"
+            style={{ color: 'var(--color-type-secondary)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-type-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-type-secondary)')}
           >
-            <Pencil size={12} />
+            <Pencil size={11} />
           </button>
           <button
             onClick={handleDelete}
-            className="p-0.5 hover:bg-red-100 dark:hover:bg-red-950/50 text-zinc-400 hover:text-red-600 rounded transition-colors"
+            className="p-0.5 rounded transition-colors"
             title="Delete Folder"
+            style={{ color: 'var(--color-type-secondary)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c0392b')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-type-secondary)')}
           >
-            <Trash2 size={12} />
+            <Trash2 size={11} />
           </button>
         </div>
       </div>
@@ -100,15 +113,26 @@ export const FolderTree = () => {
   }, [setFolders])
 
   const rootFolders = folders.filter(f => !f.parent_id)
+  const isAllActive = activeFolderId === null
 
   return (
     <div className="space-y-0.5">
-      <div 
-        className={`flex items-center gap-1.5 py-1 px-2 rounded-md cursor-pointer text-sm transition-colors ${activeFolderId === null ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50'}`}
+      <div
+        className="flex items-center gap-1.5 py-1.5 px-2 rounded-lg cursor-pointer text-[13px] transition-all duration-150 theme-transition"
+        style={{
+          backgroundColor: isAllActive ? 'var(--color-highlight)' : 'transparent',
+          color: isAllActive ? 'var(--color-accent)' : 'var(--color-type-secondary)',
+        }}
+        onMouseEnter={e => {
+          if (!isAllActive) e.currentTarget.style.backgroundColor = 'var(--color-highlight-mid)'
+        }}
+        onMouseLeave={e => {
+          if (!isAllActive) e.currentTarget.style.backgroundColor = 'transparent'
+        }}
         onClick={() => setActiveFolder(null)}
       >
-        <div className="w-[18px]"></div> {/* spacer for alignment without chevron */}
-        <Inbox size={14} className="opacity-70" />
+        <div className="w-[18px]" />
+        <Inbox size={13} className="opacity-70" />
         <span>All Notes</span>
       </div>
       {rootFolders.map(folder => (
@@ -116,4 +140,4 @@ export const FolderTree = () => {
       ))}
     </div>
   )
-}
+}

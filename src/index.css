@@ -4,8 +4,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
-
 @theme {
   --font-sans: "Geist", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif";
   --font-mono: "Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
@@ -14,11 +12,67 @@
   --font-helvetica: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
   --font-times: "Times New Roman", "Times", "Georgia", "serif";
   --font-aptos: "Aptos", "Calibri", "Segoe UI", "sans-serif";
+
+  /* ─── Warm Minimalist Light Mode ─── */
+  --color-canvas:        #FDF8F4;
+  --color-sidebar:       #F2DFCE;
+  --color-sidebar-edge:  #E8CEBC;
+  --color-accent:        #A9705E;
+  --color-accent-hover:  #8F5D4C;
+  --color-highlight:     #FFFDFB;
+  --color-highlight-mid: #F5EDE4;
+  --color-type-primary:  #2A2421;
+  --color-type-secondary:#6E645E;
+  --color-border:        #E5D4C5;
+  --color-status-text:   var(--color-type-secondary);
+
+  /* ─── Warm Dark Mode ─── */
+  --color-canvas-dark:        #1F1A17;
+  --color-sidebar-dark:       #2C2420;
+  --color-sidebar-edge-dark:  #3A2E29;
+  --color-accent-dark:        #D68A73;
+  --color-accent-hover-dark:  #E09A84;
+  --color-highlight-dark:     #2E2521;
+  --color-highlight-mid-dark: #362C27;
+  --color-type-primary-dark:  #F5ECE5;
+  --color-type-secondary-dark:#A3958E;
+  --color-border-dark:        #3F3530;
+}
+
+/* ─── Deep Obsidian Dark Mode variable overrides ─── */
+.dark {
+  /* Canvas & Surfaces */
+  --color-canvas:        #0F0F11;
+  --color-sidebar:       #16161A;
+  --color-sidebar-edge:  #1E1E24;
+
+  /* Accent — Ice Blue */
+  --color-accent:        #00B4D8;
+  --color-accent-hover:  #00CFE8;
+
+  /* Selection & Hover containers */
+  --color-highlight:     #22252A;
+  --color-highlight-mid: #1A1D21;
+
+  /* Typography */
+  --color-type-primary:  #F8F9FA;
+  --color-type-secondary:#6C757D;
+
+  /* Borders & Dividers */
+  --color-border:        #2A2D32;
+
+  /* Status bar — ice-cyan tint */
+  --color-status-text:   #90E0EF;
 }
 
 @layer utilities {
   .prose-marks mark {
     @apply bg-yellow-200 text-black rounded-sm px-0.5 font-medium;
+  }
+  /* Smooth transitions for theme switches */
+  .theme-transition,
+  .theme-transition * {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }
 
@@ -28,9 +82,16 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
+  background-color: var(--color-canvas);
 }
 
-/* Tiptap Task List Styles */
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: var(--color-canvas);
+}
+
+/* ─── Tiptap Task List Styles ─── */
 .tiptap ul[data-type="taskList"],
 .prose ul[data-type="taskList"] {
   list-style-type: none !important;
@@ -73,7 +134,7 @@ body,
   height: 1.1rem !important;
   cursor: pointer !important;
   margin: 0 !important;
-  accent-color: #0d9488 !important; /* teal-600 */
+  accent-color: #A9705E !important;
 }
 
 .tiptap li[data-type="taskItem"] > div,
@@ -95,5 +156,3 @@ body,
   text-decoration: line-through !important;
   opacity: 0.6 !important;
 }
-
-

@@ -5,6 +5,27 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import Image from '@tiptap/extension-image'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: '100%',
+        renderHTML: attributes => {
+          if (!attributes.width) {
+            return {}
+          }
+          return {
+            style: `width: ${attributes.width}; max-width: 100%; height: auto; display: block; margin: 0 auto; cursor: pointer; transition: width 0.15s ease-in-out;`,
+          }
+        },
+        parseHTML: element => element.style.width || element.getAttribute('width') || '100%',
+      },
+    }
+  },
+})
+
 import CharacterCount from '@tiptap/extension-character-count'
 import Placeholder from '@tiptap/extension-placeholder'
 import Typography from '@tiptap/extension-typography'
@@ -26,7 +47,7 @@ export const editorExtensions = [
   TextStyle,
   Color,
   Highlight.configure({ multicolor: true }),
-  Image.configure({ inline: false, allowBase64: true }),
+  CustomImage.configure({ inline: false, allowBase64: true }),
   CodeBlockLowlight.configure({
     lowlight,
     defaultLanguage: 'plaintext',

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Noetesy Notes",
+  "productName": "Notesy Notes",
   "version": "0.1.0",
   "identifier": "com.nitanshu.knowledge-base",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Noetesy Notes",
+        "title": "Notesy Notes",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

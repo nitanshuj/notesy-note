@@ -60,69 +60,128 @@ export const SearchModal = () => {
 
   if (!isSearchOpen) return null
 
-  // If no query, show recent 5 notes
-  const displayItems = query ? results : notes.slice(0, 5).map(n => ({ id: n.id, title: n.title, snippet: 'Recently edited', updated_at: n.updated_at }))
+  const displayItems = query
+    ? results
+    : notes.slice(0, 5).map(n => ({ id: n.id, title: n.title, snippet: 'Recently edited', updated_at: n.updated_at }))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/40 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4" style={{ backgroundColor: 'rgba(42,36,33,0.4)', backdropFilter: 'blur(6px)' }}>
       {/* Background click listener */}
       <div className="absolute inset-0" onClick={toggleSearch} />
-      
-      <div 
-        className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col max-h-[70vh]"
+
+      <div
+        className="relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col theme-transition"
+        style={{
+          backgroundColor: 'var(--color-canvas)',
+          border: '1px solid var(--color-border)',
+          maxHeight: '70vh',
+        }}
         role="dialog"
       >
-        <div className="flex items-center px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
-          <Search size={20} className="text-zinc-400" />
+        {/* Search Input */}
+        <div
+          className="flex items-center px-5 py-3.5"
+          style={{ borderBottom: '1px solid var(--color-border)' }}
+        >
+          <Search size={18} style={{ color: 'var(--color-type-secondary)', flexShrink: 0 }} />
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 px-3 bg-transparent outline-none text-lg text-zinc-900 dark:text-zinc-100 placeholder-zinc-400"
+            className="flex-1 px-3 bg-transparent outline-none text-lg"
             placeholder="Search notes..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            style={{ color: 'var(--color-type-primary)' }}
           />
-          <button onClick={toggleSearch} className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
-            <X size={20} />
+          <button
+            onClick={toggleSearch}
+            className="p-1 rounded-lg transition-colors"
+            style={{ color: 'var(--color-type-secondary)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-type-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-type-secondary)')}
+          >
+            <X size={18} />
           </button>
         </div>
 
+        {/* Results */}
         <div className="overflow-y-auto flex-1 p-2">
           {query && results.length === 0 ? (
-            <div className="py-12 text-center text-zinc-500">
-              <Search size={32} className="mx-auto mb-3 opacity-20" />
+            <div
+              className="py-12 text-center"
+              style={{ color: 'var(--color-type-secondary)' }}
+            >
+              <Search size={30} className="mx-auto mb-3 opacity-20" />
               <p>No results found for "{query}"</p>
             </div>
           ) : (
             <div className="space-y-1">
-              {!query && notes.length > 0 && <div className="px-3 pt-2 pb-1 text-xs font-semibold text-zinc-400 uppercase">Recent Notes</div>}
-              {displayItems.map((item, index) => (
+              {!query && notes.length > 0 && (
                 <div
-                  key={item.id}
-                  onClick={() => { setActiveNote(item.id); toggleSearch(); }}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                  className={`px-4 py-3 rounded-lg cursor-pointer flex flex-col gap-1 ${index === selectedIndex ? 'bg-teal-50 dark:bg-zinc-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}`}
+                  className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-widest"
+                  style={{ color: 'var(--color-type-secondary)' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <FileText size={16} className={index === selectedIndex ? 'text-teal-600' : 'text-zinc-400'} />
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{item.title}</span>
-                  </div>
-                  {/* use dangerouslySetInnerHTML to render FTS5 <mark> tags */}
-                  <div 
-                    className="text-sm text-zinc-600 dark:text-zinc-400 pl-6 line-clamp-2 prose-marks"
-                    dangerouslySetInnerHTML={{ __html: item.snippet }}
-                  />
+                  Recent Notes
                 </div>
-              ))}
+              )}
+              {displayItems.map((item, index) => {
+                const isSelected = index === selectedIndex
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => { setActiveNote(item.id); toggleSearch() }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className="px-4 py-3 rounded-xl cursor-pointer flex flex-col gap-1 transition-all duration-100"
+                    style={{
+                      backgroundColor: isSelected ? 'var(--color-highlight-mid)' : 'transparent',
+                      borderLeft: isSelected ? '2px solid var(--color-accent)' : '2px solid transparent',
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText
+                        size={15}
+                        style={{ color: isSelected ? 'var(--color-accent)' : 'var(--color-type-secondary)', flexShrink: 0 }}
+                      />
+                      <span
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--color-type-primary)' }}
+                      >
+                        {item.title}
+                      </span>
+                    </div>
+                    <div
+                      className="text-xs pl-6 line-clamp-2 prose-marks"
+                      style={{ color: 'var(--color-type-secondary)' }}
+                      dangerouslySetInnerHTML={{ __html: item.snippet }}
+                    />
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
-        
-        <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-xs text-zinc-500 flex items-center gap-4">
-          <span className="flex items-center gap-1"><kbd className="bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded">↑↓</kbd> to navigate</span>
-          <span className="flex items-center gap-1"><kbd className="bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Enter</kbd> to open</span>
-          <span className="flex items-center gap-1"><kbd className="bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Esc</kbd> to close</span>
+
+        {/* Footer keyboard hints */}
+        <div
+          className="px-5 py-2 flex items-center gap-4 text-[11px] theme-transition"
+          style={{
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-highlight)',
+            color: 'var(--color-type-secondary)',
+          }}
+        >
+          {[['↑↓', 'navigate'], ['Enter', 'open'], ['Esc', 'close']].map(([key, hint]) => (
+            <span key={key} className="flex items-center gap-1">
+              <kbd
+                className="px-1.5 py-0.5 rounded text-[10px]"
+                style={{ backgroundColor: 'var(--color-border)', color: 'var(--color-type-secondary)' }}
+              >
+                {key}
+              </kbd>
+              {hint}
+            </span>
+          ))}
         </div>
       </div>
     </div>
