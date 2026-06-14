@@ -6,7 +6,9 @@ At its core, the application features a powerful rich-text editor built on Tipta
 
 Organization is handled via a nested hierarchical folder system, allowing users to build a structured workspace with infinite levels of depth. Additionally, users can apply customizable, color-coded tags to cross-reference topics across different folders. A global, near-instantaneous search engine powered by SQLite’s FTS5 (Full-Text Search) allows users to query phrases across titles and note contents instantly.
 
-Notesy Notes also includes robust local asset management, allowing users to drag and drop or paste images and PDFs directly into their notes, which are sandboxed locally in the application’s dedicated data folder. Finally, the application supports export options to standard Markdown and consolidated JSON packages, ensuring users retain complete control and ownership of their data without cloud dependency.
+Notesy Notes also includes robust local asset management, allowing users to drag and drop or paste images and PDFs directly into their notes, which are sandboxed locally in the application’s dedicated data folder. Focused images can be customized directly within the editor using a context-aware floating Bubble Menu that offers sizing presets (Small, Medium, Full) and a one-click delete command.
+
+The application also features a highly polished, Fluent-inspired user interface with support for a "Warm Minimalist" light theme and a "Deep Obsidian" dark theme.
 
 ---
 
