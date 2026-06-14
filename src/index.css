@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@100..900&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+
+@theme {
+  --font-sans: "Geist", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif";
+  --font-mono: "Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
+  --font-calibri: "Calibri", "Candara", "Segoe UI", "Optima", "Arial", "sans-serif";
+  --font-comicsans: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "cursive";
+  --font-helvetica: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+  --font-times: "Times New Roman", "Times", "Georgia", "serif";
+  --font-aptos: "Aptos", "Calibri", "Segoe UI", "sans-serif";
+}
+
+@layer utilities {
+  .prose-marks mark {
+    @apply bg-yellow-200 text-black rounded-sm px-0.5 font-medium;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Tiptap Task List Styles */
+.tiptap ul[data-type="taskList"],
+.prose ul[data-type="taskList"] {
+  list-style-type: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.tiptap li[data-type="taskItem"],
+.prose li[data-type="taskItem"] {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  padding-left: 0 !important;
+}
+
+/* Hide default bullet pseudo-elements created by Tailwind Typography */
+.tiptap li[data-type="taskItem"]::before,
+.prose li[data-type="taskItem"]::before {
+  content: none !important;
+  display: none !important;
+}
+
+.tiptap li[data-type="taskItem"] > label,
+.prose li[data-type="taskItem"] > label {
+  flex: 0 0 auto !important;
+  min-height: 1.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.tiptap li[data-type="taskItem"] > label input[type="checkbox"],
+.prose li[data-type="taskItem"] > label input[type="checkbox"] {
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  accent-color: #0d9488 !important; /* teal-600 */
+}
+
+.tiptap li[data-type="taskItem"] > div,
+.prose li[data-type="taskItem"] > div {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.tiptap li[data-type="taskItem"] > div > p,
+.prose li[data-type="taskItem"] > div > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.tiptap li[data-type="taskItem"][data-checked="true"] > div,
+.tiptap li[data-type="taskItem"][data-checked="true"] > div *,
+.prose li[data-type="taskItem"][data-checked="true"] > div,
+.prose li[data-type="taskItem"][data-checked="true"] > div * {
+  text-decoration: line-through !important;
+  opacity: 0.6 !important;
+}
+
+

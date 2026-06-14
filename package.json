@@ -1,0 +1,57 @@
+{
+  "name": "knowledge-base",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "build:portable": "tauri build && powershell -Command \"$dest = 'G:\\My Drive\\My-Products\\Noetesy Note\\Executable-files'; New-Item -ItemType Directory -Force -Path $dest; Copy-Item -Path 'src-tauri\\target\\release\\bundle\\nsis\\*.exe' -Destination $dest -Force; Copy-Item -Path 'src-tauri\\target\\release\\bundle\\msi\\*.msi' -Destination $dest -Force; Write-Host 'Copied installers to Google Drive!'\""
+  },
+
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.20",
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tiptap/extension-character-count": "^3.26.1",
+    "@tiptap/extension-code-block-lowlight": "^3.26.1",
+    "@tiptap/extension-color": "^3.26.1",
+    "@tiptap/extension-highlight": "^3.26.1",
+    "@tiptap/extension-image": "^3.26.1",
+    "@tiptap/extension-link": "^3.26.1",
+    "@tiptap/extension-placeholder": "^3.26.1",
+    "@tiptap/extension-table": "^3.26.1",
+    "@tiptap/extension-table-cell": "^3.26.1",
+    "@tiptap/extension-table-header": "^3.26.1",
+    "@tiptap/extension-table-row": "^3.26.1",
+    "@tiptap/extension-task-item": "^3.26.1",
+    "@tiptap/extension-task-list": "^3.26.1",
+    "@tiptap/extension-text-style": "^3.26.1",
+    "@tiptap/extension-typography": "^3.26.1",
+    "@tiptap/extension-underline": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/react": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
+    "highlight.js": "^11.11.1",
+    "lowlight": "^3.3.0",
+    "lucide-react": "^1.18.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "uuid": "^14.0.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "tailwindcss": "^4.3.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  }
+}
