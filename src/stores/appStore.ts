@@ -39,7 +39,7 @@ export const useAppStore = create<AppState>((set) => ({
   folders: [],
   tags: [],
   isSearchOpen: false,
-  isDarkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
+  isDarkMode: false,
   editorFont: (localStorage.getItem('editorFont') as 'sans' | 'calibri' | 'comicsans' | 'helvetica' | 'times' | 'aptos') || 'sans',
   setActiveNote: (id) => set({ activeNoteId: id }),
   setActiveFolder: (id) => set({ activeFolderId: id, activeNoteId: null }),

@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
 import { useEditorStore } from '../../stores/editorStore'
@@ -26,6 +26,10 @@ export const Editor = () => {
 
   const readingTime = Math.max(1, Math.round(wordCount / 200))
 
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isSettingContentRef = useRef(false)
+  const prevNoteRef = useRef<typeof activeNote>(null)
+
   const editor = useEditor({
     extensions: editorExtensions,
     content: activeNote ? JSON.parse(activeNote.content_json) : { type: 'doc', content: [{ type: 'paragraph' }] },
@@ -43,10 +47,6 @@ export const Editor = () => {
           return false
         }
       }
-    },
-    onUpdate: ({ editor }) => {
-      setWordCount(editor.storage.characterCount.words())
-      debouncedSave(editor)
     },
   })
 
@@ -72,27 +72,66 @@ export const Editor = () => {
     }
   }, [editorFont, editor])
 
-  useEffect(() => {
-    if (editor && activeNote) {
-      if (editor.getText() !== activeNote.content_text) {
-        editor.commands.setContent(JSON.parse(activeNote.content_json))
-        setWordCount(editor.storage.characterCount.words())
-      }
-    }
-  }, [activeNote?.id])
+  const saveNoteContent = useCallback(async (noteId: string, title: string, json: string, text: string) => {
+    setIsSaving(true)
+    await noteUpdate(noteId, title, json, text)
+    setIsSaving(false)
+    setLastSaved(Date.now())
+  }, [setIsSaving, setLastSaved])
 
-  const debouncedSave = useCallback(
-    debounce(async (editorInstance) => {
-      if (!activeNote) return
-      setIsSaving(true)
+  const triggerSave = useCallback((editorInstance: any, noteId: string, title: string) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    saveTimeoutRef.current = setTimeout(async () => {
       const contentJson = JSON.stringify(editorInstance.getJSON())
       const contentText = editorInstance.getText()
-      await noteUpdate(activeNote.id, activeNote.title, contentJson, contentText)
-      setIsSaving(false)
-      setLastSaved(Date.now())
-    }, 500),
-    [activeNote]
-  )
+      await saveNoteContent(noteId, title, contentJson, contentText)
+      saveTimeoutRef.current = null
+    }, 500)
+  }, [saveNoteContent])
+
+  useEffect(() => {
+    if (!editor || !activeNote) return
+    const handleUpdate = () => {
+      if (isSettingContentRef.current) return
+      setWordCount(editor.storage.characterCount.words())
+      triggerSave(editor, activeNote.id, activeNote.title)
+    }
+    editor.on('update', handleUpdate)
+    return () => {
+      editor.off('update', handleUpdate)
+    }
+  }, [editor, activeNote?.id, activeNote?.title, setWordCount, triggerSave])
+
+  useEffect(() => {
+    if (!editor || !activeNote) return
+
+    if (activeNote.id !== prevNoteRef.current?.id) {
+      if (saveTimeoutRef.current && prevNoteRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = null
+        const contentJson = JSON.stringify(editor.getJSON())
+        const contentText = editor.getText()
+        noteUpdate(prevNoteRef.current.id, prevNoteRef.current.title, contentJson, contentText).catch(console.error)
+      }
+
+      isSettingContentRef.current = true
+      editor.commands.setContent(JSON.parse(activeNote.content_json))
+      setWordCount(editor.storage.characterCount.words())
+      isSettingContentRef.current = false
+
+      prevNoteRef.current = activeNote
+    }
+  }, [activeNote?.id, editor, setWordCount])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleDrop = async (e: React.DragEvent) => {
     if (!activeNote || !editor) return
@@ -224,13 +263,4 @@ export const Editor = () => {
       </div>
     </div>
   )
-}
-
-function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-  let timeout: ReturnType<typeof setTimeout>
-  return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-    new Promise(resolve => {
-      if (timeout) clearTimeout(timeout)
-      timeout = setTimeout(() => resolve(func(...args)), waitFor)
-    })
 }
