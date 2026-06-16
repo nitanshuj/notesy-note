@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { FileText, Star, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { notesList, noteDelete } from '../../lib/tauri'
