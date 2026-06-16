@@ -88,6 +88,19 @@ pub fn run() {
                 app.path().app_data_dir().expect("Failed to get app data dir")
             };
             let db = Database::open(app_data_dir).expect("Failed to initialize database");
+            
+            // Spawn background maintenance thread
+            let bg_db = db.clone();
+            std::thread::spawn(move || {
+                loop {
+                    // Sleep for 1 hour
+                    std::thread::sleep(std::time::Duration::from_secs(3600));
+                    if let Err(e) = bg_db.run_maintenance() {
+                        eprintln!("Maintenance error: {}", e);
+                    }
+                }
+            });
+
             app.manage(db);
             Ok(())
         })

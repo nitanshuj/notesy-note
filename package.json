@@ -1,7 +1,7 @@
 {
   "name": "knowledge-base",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,6 @@
     "tauri": "tauri",
     "build:portable": "tauri build && powershell -Command \"$dest = 'G:\\My Drive\\My-Products\\Noetesy Note\\Executable-files'; New-Item -ItemType Directory -Force -Path $dest; Copy-Item -Path 'src-tauri\\target\\release\\bundle\\nsis\\*.exe' -Destination $dest -Force; Copy-Item -Path 'src-tauri\\target\\release\\bundle\\msi\\*.msi' -Destination $dest -Force; Write-Host 'Copied installers to Google Drive!'\""
   },
-
   "dependencies": {
     "@tailwindcss/typography": "^0.5.20",
     "@tauri-apps/api": "^2.11.0",

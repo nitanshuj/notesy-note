@@ -1,34 +1,71 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { FileText, Star, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { notesList, noteDelete } from '../../lib/tauri'
 
 export const NoteList = () => {
   const { notes, setNotes, activeFolderId, activeNoteId, setActiveNote } = useAppStore()
+  const offsetRef = useRef(0)
+  const hasMoreRef = useRef(true)
+  const isLoadingRef = useRef(false)
+  const [, setForceRender] = useState(0)
+  const limit = 50
 
-  const fetchNotes = async () => {
-    try {
-      const data = await notesList(activeFolderId || undefined)
-      setNotes(data)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
+  // Reset pagination state when active folder changes
   useEffect(() => {
-    fetchNotes()
+    offsetRef.current = 0
+    hasMoreRef.current = true
+    isLoadingRef.current = false
+    setNotes([])
   }, [activeFolderId, setNotes])
 
-  if (notes.length === 0) {
-    return (
-      <div
-        className="text-[12px] px-2 py-3 italic"
-        style={{ color: 'var(--color-type-secondary)' }}
-      >
-        No notes found.
-      </div>
+  const observerTarget = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const loadMore = async () => {
+      if (isLoadingRef.current || !hasMoreRef.current) return
+      
+      isLoadingRef.current = true
+      setForceRender(prev => prev + 1)
+      
+      try {
+        const currentOffset = offsetRef.current
+        const data = await notesList(activeFolderId || undefined, limit, currentOffset)
+        
+        const currentNotes = useAppStore.getState().notes
+        if (currentOffset > 0) {
+          setNotes([...currentNotes, ...data])
+        } else {
+          setNotes(data)
+        }
+        
+        offsetRef.current = currentOffset + data.length
+        hasMoreRef.current = data.length === limit
+      } catch (e) {
+        console.error(e)
+      } finally {
+        isLoadingRef.current = false
+        setForceRender(prev => prev + 1)
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
     )
-  }
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current)
+    }
+
+    return () => observer.disconnect()
+  }, [activeFolderId, setNotes])
+
+  // The early return was preventing the observer from rendering
 
   const handleDeleteNote = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
@@ -37,7 +74,9 @@ export const NoteList = () => {
     try {
       await noteDelete(id)
       if (activeNoteId === id) setActiveNote(null)
-      await fetchNotes()
+      // refresh current page up to current offset
+      const data = await notesList(activeFolderId || undefined, offsetRef.current || limit, 0)
+      setNotes(data)
     } catch (err) {
       console.error("Failed to delete note:", err)
     }
@@ -94,6 +133,21 @@ export const NoteList = () => {
           </div>
         )
       })}
+      
+      {notes.length === 0 && !hasMoreRef.current && !isLoadingRef.current && (
+        <div
+          className="text-[12px] px-2 py-3 italic"
+          style={{ color: 'var(--color-type-secondary)' }}
+        >
+          No notes found.
+        </div>
+      )}
+
+      <div ref={observerTarget} className="h-4 w-full flex items-center justify-center">
+        {isLoadingRef.current && hasMoreRef.current && (
+          <span className="text-[10px]" style={{ color: 'var(--color-type-secondary)' }}>Loading...</span>
+        )}
+      </div>
     </div>
   )
 }

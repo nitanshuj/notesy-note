@@ -136,15 +136,24 @@ pub fn note_get(id: String, state: tauri::State<Database>) -> Result<Note, Strin
 }
 
 #[tauri::command]
-pub fn notes_list(folder_id: Option<String>, state: tauri::State<Database>) -> Result<Vec<NoteListItem>, String> {
+pub fn notes_list(
+    folder_id: Option<String>,
+    limit: Option<i64>,
+    offset: Option<i64>,
+    state: tauri::State<Database>,
+) -> Result<Vec<NoteListItem>, String> {
     let conn = state.get_conn();
     
-    let query = match &folder_id {
+    let base_query = match &folder_id {
         Some(_) => "SELECT id, title, folder_id, is_favorite, is_deleted, updated_at FROM notes WHERE is_deleted = 0 AND folder_id = ?1 ORDER BY updated_at DESC",
         None => "SELECT id, title, folder_id, is_favorite, is_deleted, updated_at FROM notes WHERE is_deleted = 0 AND folder_id IS NULL ORDER BY updated_at DESC",
     };
 
-    let mut stmt = conn.prepare(query).map_err(|e| e.to_string())?;
+    let limit_val = limit.unwrap_or(-1);
+    let offset_val = offset.unwrap_or(0);
+    let query = format!("{} LIMIT {} OFFSET {}", base_query, limit_val, offset_val);
+
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
 
     fn map_row(row: &rusqlite::Row) -> rusqlite::Result<NoteListItem> {
         let is_fav: i32 = row.get(3)?;

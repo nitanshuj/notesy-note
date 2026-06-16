@@ -11,8 +11,8 @@ export const noteUpdate = (id: string, title: string, contentJson: string, conte
 export const noteGet = (id: string) =>
   invoke<Note>('note_get', { id })
 
-export const notesList = (folderId?: string) =>
-  invoke<NoteListItem[]>('notes_list', { folderId })
+export const notesList = (folderId?: string, limit?: number, offset?: number) =>
+  invoke<NoteListItem[]>('notes_list', { folderId, limit, offset })
 
 export const noteDelete = (id: string) =>
   invoke<void>('note_delete', { id })
@@ -68,8 +68,8 @@ export const exportJsonBackup = () =>
   invoke<string>('export_json_backup')
 
 // Assets
-export const assetSave = (noteId: string, filename: string, mimeType: string, data: number[]) =>
-  invoke<string>('asset_save', { noteId, filename, mimeType, data })
+export const assetSave = (noteId: string, filename: string, mimeType: string, filePath?: string, data?: number[]) =>
+  invoke<string>('asset_save', { noteId, filename, mimeType, filePath, data })
 
 export const assetGet = (id: string) =>
   invoke<number[]>('asset_get', { id })

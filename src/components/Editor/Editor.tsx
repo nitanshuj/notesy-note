@@ -108,22 +108,29 @@ export const Editor = () => {
     if (!editor || !activeNote) return
 
     if (activeNote.id !== prevNoteRef.current?.id) {
-      if (saveTimeoutRef.current && prevNoteRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-        saveTimeoutRef.current = null
-        const contentJson = JSON.stringify(editor.getJSON())
-        const contentText = editor.getText()
-        noteUpdate(prevNoteRef.current.id, prevNoteRef.current.title, contentJson, contentText).catch(console.error)
+      const switchNote = async () => {
+        if (saveTimeoutRef.current && prevNoteRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+          saveTimeoutRef.current = null
+          const contentJson = JSON.stringify(editor.getJSON())
+          const contentText = editor.getText()
+          try {
+            setIsSaving(true)
+            await noteUpdate(prevNoteRef.current.id, prevNoteRef.current.title, contentJson, contentText)
+            setIsSaving(false)
+          } catch(e) { console.error(e) }
+        }
+
+        isSettingContentRef.current = true
+        editor.commands.setContent(JSON.parse(activeNote.content_json))
+        setWordCount(editor.storage.characterCount.words())
+        isSettingContentRef.current = false
+
+        prevNoteRef.current = activeNote
       }
-
-      isSettingContentRef.current = true
-      editor.commands.setContent(JSON.parse(activeNote.content_json))
-      setWordCount(editor.storage.characterCount.words())
-      isSettingContentRef.current = false
-
-      prevNoteRef.current = activeNote
+      switchNote()
     }
-  }, [activeNote?.id, editor, setWordCount])
+  }, [activeNote, editor, setWordCount, setIsSaving])
 
   useEffect(() => {
     return () => {
@@ -137,11 +144,17 @@ export const Editor = () => {
     if (!activeNote || !editor) return
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0]
+      const file = e.dataTransfer.files[0] as any
       if (!file.type.startsWith('image/')) return
-      const arrayBuffer = await file.arrayBuffer()
-      const data = Array.from(new Uint8Array(arrayBuffer))
-      const assetId = await assetSave(activeNote.id, file.name, file.type, data)
+      
+      let assetId: string
+      if (file.path) {
+        assetId = await assetSave(activeNote.id, file.name, file.type, file.path, undefined)
+      } else {
+        const arrayBuffer = await file.arrayBuffer()
+        const data = Array.from(new Uint8Array(arrayBuffer))
+        assetId = await assetSave(activeNote.id, file.name, file.type, undefined, data)
+      }
       editor.chain().focus().setImage({ src: `asset://${assetId}` }).run()
     }
   }

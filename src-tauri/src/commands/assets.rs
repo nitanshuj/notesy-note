@@ -17,16 +17,25 @@ pub fn asset_save(
     note_id: String,
     filename: String,
     mime_type: String,
-    data: Vec<u8>,
+    file_path: Option<String>,
+    data: Option<Vec<u8>>,
     state: tauri::State<Database>,
 ) -> Result<String, String> {
     let conn = state.get_conn();
     let id = uuid::Uuid::new_v4().to_string();
     let now = Utc::now().timestamp_millis();
     
+    let actual_data = if let Some(path) = file_path {
+        std::fs::read(path).map_err(|e| e.to_string())?
+    } else if let Some(d) = data {
+        d
+    } else {
+        return Err("No data or file path provided".to_string());
+    };
+
     conn.execute(
         "INSERT INTO assets (id, note_id, filename, mime_type, data, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        rusqlite::params![id, note_id, filename, mime_type, data, now]
+        rusqlite::params![id, note_id, filename, mime_type, actual_data, now]
     ).map_err(|e| e.to_string())?;
 
     Ok(id)
